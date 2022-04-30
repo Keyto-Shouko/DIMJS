@@ -1,11 +1,11 @@
 <template>
 <KeepAlive>
   <div id="clickerPage">
-    <h2 id="money">Your money : {{money}} 🪙</h2>
+    <h2 id="money" v-on:click="moneyInYheBank()">Your money : {{money}} 🪙</h2>
     <div v-for="ore in oresInfo" :key="ore.id" :class="ore.type" :id="ore.name" v-on:click="mineOre(ore)">
     <h2>{{ore.name}} Reserves : {{ore.number}}</h2>
     <p id="imgs" ><img :src="ore.img" onerror="this.onerror=null; this.src='src/assets/images/noImage.png'" alt="" ></p>
-     <button v-on:click="emitEvent" >Emit Event</button>
+    <p>Money income by clicking {{ore.name}} : {{ore.moneyValue+this.clickPower}}</p>
   </div>
   </div>
   </KeepAlive>
@@ -16,11 +16,24 @@
     
 
     function discoverOre(discover){
-      console.log("discover",discover)
       discover.classList.add("ore")
-      discover.setAttribute("id",discover)
       discover.style.display="inline-block"
   }
+    function check(info){
+        if (info.name == "Copper" && info.totalNumber == 1) {
+                discoverOre(Iron)
+            } else if (info.name == "Iron" && info.totalNumber == 1) {
+                discoverOre(Silver)
+            } else if (info.name == "Silver" && info.totalNumber == 1) {
+                discoverOre(Gold)
+            } else if (info.name == "Gold" && info.totalNumber == 1) {
+                discoverOre(Mithril)
+            } else if (info.name == "Mithril" && info.totalNumber == 1) {
+                discoverOre(Platinium)
+            } else if (info.name == "Platinium" && info.totalNumber == 1) {
+                discoverOre(Orichalcum)
+            }
+    }
 export default {
     data() {
         return {
@@ -94,46 +107,38 @@ export default {
         }
     },
     methods: {
+        moneyInYheBank(){
+            this.money = 99999
+        },
         autoMine(){
             for(const [ore,detail] of Object.entries(this.oresInfo)){
                 if(detail.mineNumber>0){
                 detail.number += detail.mineNumber
                 this.money+=detail.moneyValue
+                detail.totalNumber+=detail.mineNumber
+                check(detail)
             }
+            this.eventBus.emit('sendMaterials',this.oresInfo)
             }
         },
         emitEvent() {
             this.eventBus.emit('money', this.money)
         },
         mineOre: function (index) {
-            /*this.ore.number++;
-            this.gameRessource.copper.totalNumber++;*/
+            this.eventBus.emit('sendMaterials',this.oresInfo)
             index.number++;
             index.totalNumber++;
             this.money += index.moneyValue + this.clickPower;
-            if (index.name == "Copper" && index.totalNumber == 1) {
-                discoverOre(Iron)
-            } else if (index.name == "Iron" && index.totalNumber == 1) {
-                discoverOre(Silver)
-            } else if (index.name == "Silver" && index.totalNumber == 1) {
-                discoverOre(Gold)
-            } else if (index.name == "Gold" && index.totalNumber == 1) {
-                discoverOre(Mithril)
-            } else if (index.name == "Mithril" && index.totalNumber == 1) {
-                discoverOre(Platinium)
-            } else if (index.name == "Platinium" && index.totalNumber == 1) {
-                discoverOre(Orichalcum)
-            }
-
-            //console.log(document.querySelector("#"+index.name/*+" > p:nth-child(2) > img:nth-child(1)"*/))
-            //document.querySelector("#"+index.name+" > p:nth-child(2) > img:nth-child(1)").style.filter= "grayscale(100%)";
-
+            check(index)
         },
     },
     mounted() {
         setInterval(this.autoMine,1000)
         this.eventBus.on('buy', (moneyLost) => {
             this.money -= moneyLost
+        })
+        this.eventBus.on('checkMaterials',()=>{
+            this.eventBus.emit('sendMaterials',this.oresInfo)
         })
         this.eventBus.on('sell', (moneyBack) => {
             this.money += moneyBack
@@ -232,13 +237,23 @@ img{
   margin-top: 15px;
   display: none;
   border: 1px black solid;
+  border-top-left-radius: 10%;
+  border-top-right-radius: 10%;
+  border-bottom-left-radius: 10%;
+  border-bottom-right-radius: 10%;
+}
+.ore:active{
+    filter: grayscale(35%);
+    background-color: rgba(0,0,0,0.1);
 }
 #Copper{
   display: inline-block;
 }
 #clickerPage{
-  display: inline-block;
-  width: 100%;
+    z-index: 2;
+    display: inline-block;
+    width: 100%;
+    height: 94vh;
 }
 #money{
     text-align: center;
