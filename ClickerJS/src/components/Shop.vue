@@ -20,10 +20,14 @@
 </template>
 
 <script>
+//This function will display the next upgrade depending on your progression
+//discover corresponds to the name of te upgrade we need to display
   function discoverUpgrade(discover){
       discover.classList.add("upgrade")
       discover.style.display="inline-block"
   }
+  //This function checks if you have enough materials, if so it will display the next upgrade
+  //info corresponds to oresInfo from the game
   function check(info) {
     if (info.copper.totalNumber >= 1) {
       discoverUpgrade(ironMine)
@@ -61,6 +65,7 @@ export default {
     }
     },
     methods: {
+      //this method will emit a msg to the game to receive your material info
       checkMaterials(upgrade)
       {
         this.eventBus.emit("checkMaterials")
@@ -69,6 +74,7 @@ export default {
           check(materialsInfo) 
         })
       },
+      //display or hide the shop
       toggleShop(){
         let shop = document.querySelector("#shop")
         let displayProperty = shop.style.display
@@ -79,6 +85,7 @@ export default {
           shop.style.display="inline-block";
         }
       },
+      //check if you have enough money to buy, then buy upgrade
     buy(upgrade){
         this.eventBus.emit('moneyRequest')
         let price = /*Math.ceil(*/upgrade.initialPrice + upgrade.inflation//*upgrade.totalNumber*0.2)
@@ -93,6 +100,7 @@ export default {
             alert("you need "+""+(price-this.money)+" more money to buy it")
         }
     },
+    //sell an upgrade, even though you don't need it because upgrades are important
     sell(upgrade){
         if(upgrade.totalNumber>=1){
             upgrade.totalNumber--

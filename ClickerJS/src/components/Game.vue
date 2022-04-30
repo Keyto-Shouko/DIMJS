@@ -1,7 +1,7 @@
 <template>
 <KeepAlive>
   <div id="clickerPage">
-    <h2 id="money" v-on:click="moneyInYheBank()">Your money : {{money}} 🪙</h2>
+    <h2 id="money" v-on:click="moneyInTheBank()">Your money : {{money}} 🪙</h2>
     <div v-for="ore in oresInfo" :key="ore.id" :class="ore.type" :id="ore.name" v-on:click="mineOre(ore)">
     <h2>{{ore.name}} Reserves : {{ore.number}}</h2>
     <p id="imgs" ><img :src="ore.img" onerror="this.onerror=null; this.src='src/assets/images/noImage.png'" alt="" ></p>
@@ -14,11 +14,14 @@
 <script>
 
     
-
+//This function will display the next upgrade depending on your progression
+//discover corresponds to the name of te upgrade we need to display
     function discoverOre(discover){
       discover.classList.add("ore")
       discover.style.display="inline-block"
   }
+  //This function checks if you have enough materials, if so it will display the next upgrade
+  //info corresponds to oresInfo from the game
     function check(info){
         if (info.name == "Copper" && info.totalNumber == 1) {
                 discoverOre(Iron)
@@ -107,9 +110,11 @@ export default {
         }
     },
     methods: {
-        moneyInYheBank(){
-            this.money = 99999
+        //cheat to add a lot of money
+        moneyInTheBank(){
+            this.money += 99999
         },
+        //check your mines upgrades then auto click it
         autoMine(){
             for(const [ore,detail] of Object.entries(this.oresInfo)){
                 if(detail.mineNumber>0){
@@ -122,8 +127,9 @@ export default {
             }
         },
         emitEvent() {
-            this.eventBus.emit('money', this.money)
+            this.eventBus.emit('money', this.money) // send money info to shop
         },
+        //mine ore, increase money
         mineOre: function (index) {
             this.eventBus.emit('sendMaterials',this.oresInfo)
             index.number++;
@@ -151,8 +157,6 @@ export default {
                 case "Pickaxe":
                     this.clickPower++
                     break;
-
-
                 case "copperMine":
                     this.oresInfo.copper.mineNumber--
                     break;
@@ -184,8 +188,6 @@ export default {
                 case "Pickaxe":
                     this.clickPower++
                     break;
-
-
                 case "copperMine":
                     this.oresInfo.copper.mineNumber++
                     break;
@@ -210,9 +212,7 @@ export default {
                 default:
                     // code block
             }
-
         })
-        
         this.eventBus.emit('money', this.money)
     },
 }
@@ -250,6 +250,7 @@ img{
   display: inline-block;
 }
 #clickerPage{
+    background-image: 'src/assets/images/mineBG.png';
     z-index: 2;
     display: inline-block;
     width: 100%;
